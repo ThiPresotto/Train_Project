@@ -70,7 +70,8 @@ void delete_train(wagon* head,int n_vagao){
     }
 }
 
-void transicao(wagon* head,SDL_Renderer* ren, int direcao){
+void transicao(wagon** header,SDL_Renderer* ren, int direcao){
+    wagon* head = *header;
     SDL_Texture* current_wagon;
     SDL_Texture* next_wagon;
     SDL_Rect current_back = {0,0,WEIGHT,HEIGHT};
@@ -89,9 +90,9 @@ void transicao(wagon* head,SDL_Renderer* ren, int direcao){
         else{
             next_wagon = IMG_LoadTexture(ren,"../assets/Wagon_Night.png");
         }
-        next_back = (SDL_Rect) {-1052,0,WEIGHT,HEIGHT};
-        trans = (SDL_Rect) {-104,0,104,HEIGHT};
-        head = head->left;
+        next_back = (SDL_Rect) {-1050,0,WEIGHT,HEIGHT};
+        trans = (SDL_Rect) {-102,0,104,HEIGHT};
+        *header = head->left;
     }
     else{
         if (head->right->aceso == true){
@@ -100,17 +101,18 @@ void transicao(wagon* head,SDL_Renderer* ren, int direcao){
         else{
             next_wagon = IMG_LoadTexture(ren,"../assets/Wagon_Night.png");
         }
-        next_back = (SDL_Rect){1052,0,WEIGHT,HEIGHT};
-        trans = (SDL_Rect) {948,0,104,HEIGHT};
-        head = head->right;
+        next_back = (SDL_Rect){1050,0,WEIGHT,HEIGHT};
+        trans = (SDL_Rect) {948,0,102,HEIGHT};
+        *header = head->right;
 
     }
-    for(int i = 0;i<2000;i+=10){
+    for(int i = 0;i<1050;i+=10){
         SDL_RenderCopy(ren,current_wagon,NULL,&current_back);
         SDL_RenderCopy(ren,next_wagon,NULL,&next_back);
+        SDL_SetRenderDrawColor(ren, 0x4F,0x4D,0x4D,0x00);
         SDL_RenderFillRect(ren,&trans);
         SDL_RenderPresent(ren);
-        if(direcao = 0){
+        if(direcao == 0){
             current_back.x +=10;
             trans.x += 10;
             next_back.x += 10;
@@ -163,10 +165,10 @@ int main(int argc, char* argv){
         if(evt.type == SDL_KEYDOWN){
             switch(evt.key.keysym.sym){
                 case SDLK_LEFT:
-                    transicao(head,ren,0);
+                    transicao(&head,ren,0);
                     break;
                 case SDLK_RIGHT:
-                    transicao(head,ren,1);
+                    transicao(&head,ren,1);
                     break;
                 case SDLK_x:
                     goto exit;
