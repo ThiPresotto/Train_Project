@@ -122,7 +122,7 @@ void transicao(wagon** header,SDL_Renderer* ren, int direcao){
             trans.x -= 10;
             next_back.x -= 10;
         }
-        SDL_Delay(10);
+
     }
 
 }
@@ -160,7 +160,7 @@ int main(int argc, char* argv){
             SDL_RenderCopy(ren,night_wagon,NULL,&background);
         }
         SDL_RenderPresent(ren);
-
+        
         SDL_WaitEvent(&evt);
         if(evt.type == SDL_KEYDOWN){
             switch(evt.key.keysym.sym){

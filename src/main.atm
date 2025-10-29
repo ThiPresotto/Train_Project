@@ -1,0 +1,89 @@
+
+;;DECLARE
+
+set SDL = require "SDL"
+set IMG = require "SDL.image"
+set TTF = require "SDL.ttf"
+
+set sdl = require "atmos.env.sdl"
+
+SDL.init() --> assert
+TTF.init() --> assert
+IMG.init() --> assert
+
+defer {
+    TTF.quit()
+    SDL.quit()
+    IMG.quit()
+}
+
+;;INICIALIZANDO
+
+val WIN = SDL.createWindow @{
+    title = "Circular birds",
+    width = 2*474,
+    height = 2*265,
+    flags = @{SDL.flags.OpenGL}
+} -->assert
+
+set REN = SDL.createRenderer(WIN, -1) --> assert
+set sdl.ren = REN
+
+val LIGHT = tex where {
+    sfc = IMG.load("../assets/Wagon_Day.png") --> assert
+    tex = REN::createTextureFromSurface(sfc) --> assert
+} 
+
+val DARK = tex where{
+    sfc = IMG.load("../assets/Wagon_Night.png") --> assert
+    tex = REN::createTextureFromSurface(sfc) --> assert
+}
+
+func Trans (t_atual,t_prox){
+    print("....")
+    await @1
+}
+
+;;START CODE 
+
+math.randomseed(os.time())
+val n_vagao = math.random(3,7)
+val trains = @{}
+
+print(n_vagao)
+loop i in n_vagao {
+    set trains[i] = (math.random(0,1) == 1)
+}
+
+xprint(trains)
+
+var index = 1
+
+spawn{
+    every :sdl.draw{
+        val rect = @{x = 0, y = 0, w = 2*474, h = 2*265}
+        val img = if (trains[index]) => LIGHT => DARK
+        REN::copy(img,nil,rect)
+    }
+}
+
+watching SDL.event.KeyDown, 'X' {
+    loop {
+        val _,k = await(SDL.event.KeyDown)
+        match k.name {
+            :Space => set trains[index] = !trains[index]
+            :Right => {
+                val next = ((index)%n_vagao) + 1
+                print(index,'>',next) 
+                await Trans(index,next)
+                set index = next
+            }
+            :Left  => {
+                val next = ((index - 2) % n_vagao) + 1
+                print(index,'>',next) 
+                Trans(index,next)
+                set index = next
+            }
+        }
+    }
+}
