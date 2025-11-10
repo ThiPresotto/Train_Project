@@ -1,4 +1,3 @@
-
 ;;DECLARE
 
 set SDL = require "SDL"
@@ -20,7 +19,7 @@ defer {
 ;;INICIALIZANDO
 
 val WIN = SDL.createWindow @{
-    title = "Circular birds",
+    title = "Circular train",
     width = 2*474,
     height = 2*265,
     flags = @{SDL.flags.OpenGL}
@@ -28,6 +27,8 @@ val WIN = SDL.createWindow @{
 
 set REN = SDL.createRenderer(WIN, -1) --> assert
 set sdl.ren = REN
+
+val FNT = TTF.open("../assets/tiny.ttf", 40)
 
 val LIGHT = tex where {
     sfc = IMG.load("../assets/Wagon_Day.png") --> assert
@@ -38,13 +39,6 @@ val DARK = tex where{
     sfc = IMG.load("../assets/Wagon_Night.png") --> assert
     tex = REN::createTextureFromSurface(sfc) --> assert
 }
-
-func Trans (t_atual,t_prox){
-    print("....")
-    await @1
-}
-
-;;START CODE 
 
 math.randomseed(os.time())
 val n_vagao = math.random(3,7)
@@ -58,32 +52,111 @@ loop i in n_vagao {
 xprint(trains)
 
 var index = 1
+var resposta = " "
+var count = 0
 
-spawn{
-    every :sdl.draw{
-        val rect = @{x = 0, y = 0, w = 2*474, h = 2*265}
-        val img = if (trains[index]) => LIGHT => DARK
-        REN::copy(img,nil,rect)
+func Trans (t_atual,t_prox){
+    val vagao_a = estado where {
+        estado = if (trains[t_atual]) => LIGHT => DARK        
     }
+    val vagao_s = estado where{
+        estado = if (trains[t_prox]) => LIGHT => DARK
+    }
+    var back_atual = @{x = 0, y = 0, w = 2*474, h = 2*265}
+
+    if ((t_prox + n_vagao )==((t_atual + 1 ) % n_vagao)){ 
+        set back_seguinte = @{x = 1050, y = 0, w = 2*474, h = 2*265}  
+        set grey_b = @{x = 958, y = 0, w = 92, h = 2*265} 
+    }
+    else{
+        set back_seguinte = @{x = -1050, y = 0, w = 2*474, h = 2*265}  
+        set grey_b = @{x = -92, y = 0, w = 92, h = 2*265} 
+    }
+    print("....")
+    await @1
 }
 
-watching SDL.event.KeyDown, 'X' {
-    loop {
-        val _,k = await(SDL.event.KeyDown)
-        match k.name {
-            :Space => set trains[index] = !trains[index]
-            :Right => {
-                val next = ((index)%n_vagao) + 1
-                print(index,'>',next) 
-                await Trans(index,next)
-                set index = next
+
+func Digitar_Resposta(){
+    var count = 0
+    watching SDL.event.KeyDown, :Escape {
+                        loop{
+                            val _, k2 = await(SDL.event.KeyDown)
+                            if ((k2.name <= '9')&&(k2.name >= '0')){
+                                if (count == 3) {
+                                }
+                                else{
+                                    set resposta = resposta ++ k2.name 
+                                    set count = count +1
+                                } 
+                            }
+                            if (k2.name == 'Backspace'){
+                                if (count == 0){
+                                }
+                                else {
+                                    set resposta = resposta::sub(1,-2)
+                                    set count = count - 1
+                                }
+                            }
+                            if (k2.name == 'Return'){
+                                return(resposta)
+                            }
+                        }
+                    }
+    set resposta = " "
+    return()
+}
+
+;;START CODE 
+
+
+
+spawn{
+        par{    
+            every :sdl.draw{
+                val rect = @{x = 0, y = 0, w = 2*474, h = 2*265}
+                val img = if (trains[index]) => LIGHT => DARK
+                REN::copy(img,nil,rect)
             }
-            :Left  => {
-                val next = ((index - 2) % n_vagao) + 1
-                print(index,'>',next) 
-                Trans(index,next)
-                set index = next
+        } with {
+            val rect = @{x = (2*474)/2, y =(2*265)/2}
+            every :sdl.draw{
+                REN::setDrawColor(0xFFFFFF)
+                sdl.write(FNT,resposta,rect)
+            }
+        }
+}
+
+val resposta = do :Done{
+    watching SDL.event.KeyDown, 'X' { ;;Melhor a se fazer com esse "X"?
+        loop {
+            val _,k = await(SDL.event.KeyDown)
+            match k.name {
+                :Space => set trains[index] = !trains[index]
+                :Right => {
+                    val next = ((index)%n_vagao) + 1
+                    print(index,'>',next) 
+                    await Trans(index,next)
+                    set index = next
+                }
+                :Left  => {
+                    val next = ((index - 2) % n_vagao) + 1
+                    print(index,'>',next) 
+                    Trans(index,next)
+                    set index = next
+                }
+                :Return => {
+                    val v = await Digitar_Resposta()
+                    if v {
+                        escape(:Done, v)
+                    }
+                }
             }
         }
     }
 }
+
+
+print(resposta++" = resposta")
+if (tonumber(resposta) == n_vagao) => print("parabens, vc ganhou") => print("Ih, sabe não")
+await @2
