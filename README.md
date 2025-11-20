@@ -1,4 +1,5 @@
-Enigma Trem infinito
+Enigma Trem infinito:
+![logo](../Infinigma-Train.png)
 
 OBJETIVO:
   Um minijogo de puzzle com o objetivo de responder a pergunta do fantasma que te prendeu no Trem. Não
