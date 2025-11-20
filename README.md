@@ -1,12 +1,8 @@
-Projeto Trem Circula, jogo.
+Enigma Trem infinito
 
 OBJETIVO:
-  Você está em um trem no qual todos os vagões estão conectados entre si. Não há janelas, não como marcar nenhum vagão.
-  única medida que você pode tomar é ligar ou desligar as luzes do vagão. O jogo é, como você pode adivinhar sem sombra de 
-  dúvidas quantos vagões existem nesse trem?
-
-TODO:
-  Fixar transições (lock events while transitioning)
-  Criar Mecanismos de resposta em texto
-  Adicionar Sons
-  Modularizar código...
+  Um minijogo de puzzle com o objetivo de responder a pergunta do fantasma que te prendeu no Trem. Não
+  conhecemos a pergunta, devemos colher pistas no cenário do jogo para descobrir qual é pergunta e 
+  consequentemente sua resposta. Tentarei implementar um design de enigma que durante seu processo de
+  resolução uma etapa possa gerar mais do que uma resposta, levando a caminhos diferentes para resolver 
+  a tarefa.
