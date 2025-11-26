@@ -1,0 +1,44 @@
+set MIX = require "SDL.mixer"
+
+set sdl = require "atmos.env.sdl"
+
+SDL.init() --> assert
+TTF.init() --> assert
+IMG.init() --> assert
+MIX.init() --> assert
+
+defer {
+    TTF.quit()
+    SDL.quit()
+    IMG.quit()
+    MIX.quit()
+}
+
+;;INICIALIZANDO
+
+val WIN = SDL.createWindow @{
+    title = "Circular train",
+    width = 2*474,
+    height = 2*265,
+    flags = @{SDL.flags.OpenGL}
+} -->assert
+
+set REN = SDL.createRenderer(WIN, -1) --> assert
+set sdl.ren = REN
+
+val FNT = TTF.open("../assets/tiny.ttf", 40)
+
+MIX.openAudio(44100, SDL.audioFormat.S16, 2, 1024) -->assert;
+
+val LIGHT = tex where {
+    sfc = IMG.load("../assets/Wagon_Day.png") --> assert
+    tex = REN::createTextureFromSurface(sfc) --> assert
+} 
+
+
+loop{
+    every sdl.draw{
+        rect = @{x = 0, y = y, w = 2*474, h = 2*265}
+        REN::copy(LIGHT,nil,rect)
+    }
+}
